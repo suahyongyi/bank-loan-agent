@@ -12,7 +12,12 @@ st.set_page_config(
 
 # --- 🔒 AUTHENTICATION GATE ---
 # 1. Define the password
-ACCESS_PASSWORD = "iti122" 
+try:
+    ACCESS_PASSWORD = st.secrets["AUTH_PASSWORD"]
+except KeyError:
+    # Fallback if the secret isn't set (prevents a crash)
+    st.error("⚠️ Authentication password not found in secrets.")
+    st.stop()
 
 # 2. Check Authentication Status
 if "authenticated" not in st.session_state:
