@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import uuid
+import time
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
@@ -81,6 +82,9 @@ if prompt := st.chat_input("Enter Customer ID or ask a question..."):
     with st.chat_message("assistant"):
         with st.spinner("Connecting to Agent..."):
             try:
+                # 1. Start the Timer ⏱️
+                start_time = time.time()
+
                 payload = {
                     "question": prompt,
                     "overrideConfig": {
@@ -92,6 +96,10 @@ if prompt := st.chat_input("Enter Customer ID or ask a question..."):
                 response.raise_for_status()
                 output = response.json()
                 
+                # 2. Stop the Timer ⏱️
+                end_time = time.time()
+                latency = end_time - start_time
+
                 if isinstance(output, dict) and "text" in output:
                     bot_text = output["text"]
                 elif isinstance(output, dict) and "json" in output:
@@ -100,6 +108,10 @@ if prompt := st.chat_input("Enter Customer ID or ask a question..."):
                     bot_text = str(output)
 
                 st.markdown(bot_text)
+                
+                # 3. Display the Latency (Small text)
+                st.caption(f"⏱️ Response Time: {latency:.2f} seconds")
+
                 st.session_state.messages.append({"role": "assistant", "content": bot_text})
 
             except requests.exceptions.RequestException as e:
